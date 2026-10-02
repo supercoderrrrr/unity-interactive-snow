@@ -2,9 +2,9 @@
 
 A compact Unity portfolio project that turns character movement into persistent snow deformation at runtime
 
-![Interactive snow result](Documentation/Images/interactive-snow-result.jpg)
+![Interactive snow animated preview](Documentation/Images/interactive-snow-demo.gif)
 
-[Watch the 15-second demonstration](Documentation/Videos/interactive-snow-demo.mp4)
+[Full-resolution screenshot](Documentation/Images/interactive-snow-result.jpg) · [Watch the 15-second demonstration](Documentation/Videos/interactive-snow-demo.mp4)
 
 ## Overview
 
@@ -111,9 +111,9 @@ The portfolio implementation extends the tutorial concepts with runtime UV paint
 
 这是一个 Unity 作品集项目，将角色移动实时记录为持续存在的雪地凹陷轨迹
 
-![交互式雪地最终效果](Documentation/Images/interactive-snow-result.jpg)
+![交互式雪地循环演示](Documentation/Images/interactive-snow-demo.gif)
 
-[观看 15 秒演示视频](Documentation/Videos/interactive-snow-demo.mp4)
+[查看高清截图](Documentation/Images/interactive-snow-result.jpg) · [观看 15 秒演示视频](Documentation/Videos/interactive-snow-demo.mp4)
 
 ## 项目概述
 

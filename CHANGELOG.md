@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Eight-second looping GIF preview embedded in both README language sections
+
 ## 1.0.0 — Portfolio release
 
 ### Added
