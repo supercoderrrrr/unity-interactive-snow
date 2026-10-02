@@ -1,0 +1,75 @@
+# Unity generated folders
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+
+# IDE files
+/.vs/
+/.vscode/
+/.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.opendb
+*.VC.db
+
+# Unity and OS transient files
+*.tmp
+*.pdb
+*.mdb
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+crashlytics-build.properties
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local source control metadata
+/.plastic/
+/ignore.conf
+
+# Build artifacts
+*.apk
+*.aab
+*.app
+*.unitypackage
+
+# Third-party Asset Store content excluded from public redistribution
+/Assets/Animals/
+/Assets/Animals.meta
+/Assets/People/
+/Assets/People.meta
+/Assets/Tree/
+/Assets/Tree.meta
+/Assets/URP/
+/Assets/URP.meta
+/Assets/Editor/
+/Assets/Editor.meta
+/Assets/Runtime/
+/Assets/Runtime.meta
+/Assets/Textures/
+/Assets/Textures.meta
+/Assets/TutorialInfo/
+/Assets/TutorialInfo.meta
+/Assets/Readme.asset
+/Assets/Readme.asset.meta
+/Assets/scene preview.unity
+/Assets/scene preview.unity.meta
+/Packages/xyz.staggartcreations.skyboxes/
+
+# Unverified source textures excluded from the public snapshot
+/Assets/InteractiveSnow/Textures/
+/Assets/InteractiveSnow/Textures.meta
+/Assets/Resources/111.jpg
+/Assets/Resources/111.jpg.meta
