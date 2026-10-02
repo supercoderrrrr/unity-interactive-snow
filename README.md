@@ -1,41 +1,96 @@
 # Interactive Snow — Unity URP
 
-Interactive snow deformation in Unity URP using Render Texture painting and Shader Graph.
+A compact Unity portfolio project that turns character movement into persistent snow deformation at runtime
 
 ![Interactive snow animated preview](Documentation/Images/interactive-snow-demo.gif)
 
 [Full-resolution screenshot](Documentation/Images/interactive-snow-result.jpg) · [Watch the 15-second demonstration](Documentation/Videos/interactive-snow-demo.mp4)
 
-Character movement paints a persistent track mask into a Render Texture. Shader Graph reads the mask to displace the snow surface and adjust its color and normals.
+## Overview
+
+The project records a moving character as a continuous mask in a runtime Render Texture, then uses that mask in Shader Graph to control snow displacement, color, and normal detail
+
+The final implementation uses code-driven texture painting rather than a tracking camera as its authoritative path. A legacy camera and VFX Graph experiment remains in the project for comparison
 
 ## Technical highlights
 
 ### 1. World position to snow UV
 
-`PlayerControl` raycasts against the snow `MeshCollider`, reads `RaycastHit.textureCoord`, and draws a soft brush at the corresponding Render Texture pixel.
+`PlayerControl` casts a ray against the snow `MeshCollider`, reads `RaycastHit.textureCoord`, converts the UV into pixel coordinates, and stamps a soft brush into the runtime Render Texture
 
 ![Raycast UV and Render Texture drawing](Documentation/Images/raycast-uv-render-texture.png)
 
 ### 2. Continuous track interpolation
 
-`trackInterpolation` sets the distance between brush samples along the movement path, keeping the track connected between frames.
+Movement between frames is subdivided by `trackInterpolation`. The additional samples prevent visible gaps when the character moves quickly or the frame rate changes
 
 ![Continuous track interpolation](Documentation/Images/track-interpolation.png)
 
 ### 3. Shader-driven deformation
 
-Shader Graph samples `_TrackTexture` to control vertex displacement, surface color, and normal detail.
+The Shader Graph samples `_TrackTexture` in both vertex and fragment stages. The mask drives vertex displacement while related branches adjust surface color and reconstructed normal detail
 
 ![Shader Graph overview](Documentation/Images/shader-graph-overview.jpg)
 
-## Setup
+### 4. Runtime-friendly ownership
 
-Open the project with Unity `2022.3.62f2` and let Unity restore the packages. The project uses URP `14.0.12`, Shader Graph, and Visual Effect Graph.
+- A runtime ARGB32 Render Texture stores persistent track data
+- `MaterialPropertyBlock` assigns the texture per snow renderer without cloning the material
+- A configurable stamp limit prevents large teleports from producing unbounded work in one frame
+- An optional `RawImage` exposes the live mask for debugging and portfolio presentation
+- Camera-relative movement and an orbit camera provide a standard third-person presentation
 
-- `Assets/Scenes/Code.unity` — final scene with code-painted tracks
-- `Assets/Scenes/TestScene.unity` — earlier tracking-camera setup
+## Data flow
 
-Third-party character, animal, tree, and skybox source assets are not included. Restore the licensed assets or replace their references to reproduce the full `Code` scene shown in the demo.
+```text
+Character movement
+        ↓
+World-space interpolation
+        ↓
+MeshCollider raycast
+        ↓
+Surface UV → Render Texture pixel
+        ↓
+Soft brush stamp
+        ↓
+Shader Graph vertex displacement + shading
+```
+
+## Project structure
+
+```text
+Assets/
+├─ Scripts/PlayerController.cs       Runtime movement, orbit camera, UV painting
+├─ Shader/SG_Snow.shadergraph        Final snow deformation and shading graph
+├─ Materials/Mat_Snow.mat            Final Shader Graph material
+├─ Resources/                        Dense snow meshes, brush, and RT assets
+├─ InteractiveSnow/                  Earlier tracking-camera experiment
+└─ Scenes/
+   ├─ Code.unity                     Final portfolio scene
+   └─ TestScene.unity                Compact reference scene
+Documentation/
+├─ Images/                            README captures
+└─ Videos/interactive-snow-demo.mp4  Edited 15-second demonstration
+```
+
+## Requirements
+
+- Unity `2022.3.62f2`
+- Universal Render Pipeline `14.0.12`
+- Shader Graph
+- Visual Effect Graph for the legacy comparison scene
+
+## Opening the project
+
+1. Clone the repository
+2. Open the folder with Unity `2022.3.62f2`
+3. Let Unity restore packages from `Packages/manifest.json`
+4. Open `Assets/Scenes/TestScene.unity` for the compact reference setup
+5. Open `Assets/Scenes/Code.unity` for the final portfolio composition after restoring its external presentation assets
+
+The public repository intentionally excludes redistributable copies of third-party character, creature, vegetation, and skybox packages. The final `Code` scene may show missing prefab references until equivalent licensed assets are imported. The interaction code, snow meshes, Shader Graph, materials, project settings, screenshots, and demonstration remain available for review
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for details
 
 ## Controls
 
@@ -44,50 +99,107 @@ Third-party character, animal, tree, and skybox source assets are not included. 
 - Hold `Right Mouse Button` — orbit the camera
 - `Mouse Wheel` — zoom
 
-## Reference
+## Reference and attribution
 
-Based on the tutorial [Unity 可交互雪地视频教程（包含代码计算轨迹图方式）](https://www.bilibili.com/video/BV1MT4y1a7ut?p=11).
+The project was developed while studying the Bilibili tutorial [Unity 可交互雪地视频教程（包含代码计算轨迹图方式）](https://www.bilibili.com/video/BV1MT4y1a7ut?p=11&vd_source=df4a61d6ea26dbda80b1572d707073cb)
+
+The portfolio implementation extends the tutorial concepts with runtime UV painting, movement interpolation safeguards, Render Texture preview, character animation integration, and an orbiting third-person controller
 
 ---
 
 # 交互式雪地 — Unity URP
 
-使用 Render Texture 绘制和 Shader Graph 实现的 Unity URP 交互式雪地。
+这是一个 Unity 作品集项目，将角色移动实时记录为持续存在的雪地凹陷轨迹
 
 ![交互式雪地循环演示](Documentation/Images/interactive-snow-demo.gif)
 
 [查看高清截图](Documentation/Images/interactive-snow-result.jpg) · [观看 15 秒演示视频](Documentation/Videos/interactive-snow-demo.mp4)
 
-角色移动时，代码将轨迹持续绘制到 Render Texture。Shader Graph 读取这张遮罩，驱动雪地顶点位移、颜色和法线变化。
+## 项目概述
+
+项目把角色移动轨迹绘制到运行时 Render Texture，再由 Shader Graph 读取这张遮罩，驱动雪地的顶点位移、颜色变化和法线细节
+
+最终版本以代码绘制轨迹图作为主要实现，同时保留早期的 Track Camera 与 VFX Graph 实验方案用于对比
 
 ## 核心技术点
 
 ### 1. 世界坐标转换为雪地 UV
 
-`PlayerControl` 向雪地 `MeshCollider` 发射射线，通过 `RaycastHit.textureCoord` 获取表面 UV，在对应的 Render Texture 像素位置绘制柔边笔刷。
+`PlayerControl` 向雪地 `MeshCollider` 发射射线，通过 `RaycastHit.textureCoord` 获取表面 UV，将其换算成 Render Texture 像素坐标，并绘制柔边笔刷
 
 ![射线获取 UV 并绘制 Render Texture](Documentation/Images/raycast-uv-render-texture.png)
 
 ### 2. 连续轨迹插值
 
-`trackInterpolation` 控制移动路径上相邻笔刷采样点的距离，通过补点让帧与帧之间的轨迹保持连续。
+脚本根据 `trackInterpolation` 对相邻两帧的位置进行补点，避免角色移动速度较快或帧率变化时出现断裂轨迹
 
 ![连续轨迹插值](Documentation/Images/track-interpolation.png)
 
 ### 3. Shader Graph 雪地变形
 
-Shader Graph 读取 `_TrackTexture`，通过遮罩控制顶点位移、表面颜色和法线细节。
+Shader Graph 在顶点和片元阶段读取 `_TrackTexture`，通过遮罩控制顶点位移，并同步调整颜色与重建后的法线细节
 
 ![Shader Graph 总览](Documentation/Images/shader-graph-overview.jpg)
 
-## 运行
+### 4. 运行时设计
 
-使用 Unity `2022.3.62f2` 打开工程并等待依赖恢复。项目使用 URP `14.0.12`、Shader Graph 和 Visual Effect Graph。
+- 使用运行时 ARGB32 Render Texture 保存持久轨迹
+- 通过 `MaterialPropertyBlock` 为雪地 Renderer 设置贴图，避免复制材质
+- 使用单帧最大盖章数量限制，避免角色瞬移带来无上限开销
+- 使用可选 `RawImage` 实时展示轨迹遮罩，方便调试和作品集演示
+- 提供基于相机方向的移动和自由环绕第三人称相机
 
-- `Assets/Scenes/Code.unity` — 代码绘制轨迹的最终场景
-- `Assets/Scenes/TestScene.unity` — 早期 Track Camera 实验场景
+## 数据流程
 
-仓库未包含第三方人物、动物、树木和天空盒的源资源。需要导入相应的授权资源或替换其引用，才能完整还原演示中的 `Code` 场景。
+```text
+角色移动
+   ↓
+世界空间位置插值
+   ↓
+MeshCollider 射线检测
+   ↓
+表面 UV → Render Texture 像素
+   ↓
+绘制柔边笔刷
+   ↓
+Shader Graph 顶点位移与表面着色
+```
+
+## 工程结构
+
+```text
+Assets/
+├─ Scripts/PlayerController.cs       移动、环绕相机与 UV 绘制
+├─ Shader/SG_Snow.shadergraph        最终雪地变形和着色
+├─ Materials/Mat_Snow.mat            Shader Graph 材质
+├─ Resources/                        雪地网格、笔刷和 RT 资源
+├─ InteractiveSnow/                  早期 Track Camera 实验方案
+└─ Scenes/
+   ├─ Code.unity                     最终作品集场景
+   └─ TestScene.unity                精简参考场景
+Documentation/
+├─ Images/                            README 截图
+└─ Videos/interactive-snow-demo.mp4  剪辑后的 15 秒演示
+```
+
+## 环境要求
+
+- Unity `2022.3.62f2`
+- Universal Render Pipeline `14.0.12`
+- Shader Graph
+- Visual Effect Graph，用于早期实验场景
+
+## 打开工程
+
+1. 克隆仓库
+2. 使用 Unity `2022.3.62f2` 打开项目目录
+3. 等待 Unity 根据 `Packages/manifest.json` 恢复依赖
+4. 打开 `Assets/Scenes/TestScene.unity` 查看精简参考方案
+5. 恢复外部展示资源后，打开 `Assets/Scenes/Code.unity` 查看最终作品集场景
+
+公开仓库不会重新分发第三方角色、动物、植被和天空盒资源包，因此最终 `Code` 场景在重新导入相应授权资源前可能出现 Prefab 丢失。核心交互代码、雪地网格、Shader Graph、材质、项目设置、截图和演示视频均保留在仓库中供审阅
+
+详细说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
 
 ## 操作方式
 
@@ -96,6 +208,8 @@ Shader Graph 读取 `_TrackTexture`，通过遮罩控制顶点位移、表面颜
 - 按住 `鼠标右键` — 环绕旋转相机
 - `鼠标滚轮` — 缩放镜头
 
-## 参考
+## 参考与致谢
 
-参考教程：[Unity 可交互雪地视频教程（包含代码计算轨迹图方式）](https://www.bilibili.com/video/BV1MT4y1a7ut?p=11)。
+本项目在学习 Bilibili 教程 [Unity 可交互雪地视频教程（包含代码计算轨迹图方式）](https://www.bilibili.com/video/BV1MT4y1a7ut?p=11&vd_source=df4a61d6ea26dbda80b1572d707073cb) 的过程中完成
+
+作品集版本在教程思路上补充了运行时 UV 绘制、移动插值保护、Render Texture 实时预览、角色动画接入和自由环绕第三人称控制
